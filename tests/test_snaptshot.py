@@ -1,4 +1,4 @@
-from snapshot import Snapshot
+from thoughts import Snapshot
 from datetime import datetime as dt
 
 

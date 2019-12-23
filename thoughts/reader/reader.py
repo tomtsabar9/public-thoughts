@@ -1,9 +1,9 @@
 
 import struct
-import PIL
+from PIL import Image
 
-from formats import fmt
-from snapshot import Snapshot
+from .formats import fmt
+from .snapshot import Snapshot
 
 class Reader():
     def __init__(self, path):
@@ -23,32 +23,33 @@ class Reader():
 
         while 1:
             try:
-                time =struct.unpack(fmt.TIME_FORMAT, self.data_file.read(8))
+
+                time =struct.unpack(fmt.TIME_FORMAT, self.data_file.read(8))[0]
             except:
                 break
 
-                tx, ty, tz =struct.unpack(fmt.TRNSL_FORMAT, self.data_file.read(24))
+            tx, ty, tz =struct.unpack(fmt.TRNSL_FORMAT, self.data_file.read(24))
 
-                rx, ry, rz, rw, hight, width =struct.unpack(fmt.ROTATE_IMWIDTH_IMHIGHT_FORMAT, self.data_file.read(40))
+            rx, ry, rz, rw, hight, width =struct.unpack(fmt.ROTATE_IMWIDTH_IMHIGHT_FORMAT, self.data_file.read(40))
                 
-                img_color_array = struct.unpack(fmt.BYTE_ARRAY_FORMAT(hight*width*3), self.data_file.read(hight*width*3))[0]
+            img_color_array = struct.unpack(fmt.BYTE_ARRAY_FORMAT(hight*width*3), self.data_file.read(hight*width*3))[0]
                 
-                image = PIL.Image.frombytes("RGB",(width,hight),img_color_array, 'raw')
+            image = Image.frombytes("RGB",(width,hight),img_color_array, 'raw')
 
-                dhight, dwidth = struct.unpack(fmt.DEPTH_IMWIDTH_IMHIGHT_FORMAT, self.data_file.read(8))
+            dhight, dwidth = struct.unpack(fmt.DEPTH_IMWIDTH_IMHIGHT_FORMAT, self.data_file.read(8))
 
-                img_depth_array = struct.unpack(fmt.BYTE_ARRAY_FORMAT(dhight*dwidth*4), self.data_file.read(dhight*dwidth*4))[0]
+            img_depth_array = struct.unpack(fmt.BYTE_ARRAY_FORMAT(dhight*dwidth*4), self.data_file.read(dhight*dwidth*4))[0]
 
-                dimage = PIL.Image.frombytes("I",(dwidth,dhight), img_depth_array, 'raw')
+            dimage = Image.frombytes("I",(dwidth,dhight), img_depth_array, 'raw')
 
-                hunger, thirst, exhaustion, happiness = struct.unpack(fmt.FEELING_FORMAT, self.data_file.read(16))
+            hunger, thirst, exhaustion, happiness = struct.unpack(fmt.FEELING_FORMAT, self.data_file.read(16))
+            
+            snapshot = Snapshot(time)
+            snapshot.set_location(tx, ty, tz)
+            snapshot.set_rotation(rx, ry, rz, rw)
+            snapshot.set_color_image(hight, width, img_color_array)
+            snapshot.set_depth_image(dhight, dwidth, img_depth_array)
+            snapshot.set_thoughts(hunger, thirst, exhaustion, happiness)
 
-                snapshot = Snapshot(time)
-                snapshot.set_location(tx, ty, tz)
-                snapshot.set_rotation(rx, ry, rz, rw)
-                snapshot.set_color_image(hight, width, img_color_array)
-                snapshot.set_depth_image(dhight, dwidth, img_depth_array)
-                snapshot.set_thoughts(hunger, thirst, exhaustion, happiness)
-
-                yield snapshot
+            yield snapshot
             
