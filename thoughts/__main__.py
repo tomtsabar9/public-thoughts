@@ -1,18 +1,27 @@
 from .reader import Reader
+from .reader import Fmt
 import sys
-from datetime import  datetime as dt
+from datetime import datetime as dt
 
 
 def main():
-    if len(sys.argv) !=3:
-        print ('Usage: python -m thoughts <command> <arg>')
+    if len(sys.argv) != 3:
+        print('Usage: python -m thoughts <command> <arg>')
         return
 
     if sys.argv[1] == 'read':
-        reader = Reader(sys.argv[2])
+        rdr = Reader(sys.argv[2])
 
-        print (f'user {reader.id}: {reader.name}, born {dt.fromtimestamp(reader.birth)} ({reader.gender})')
-        for sn in reader:
-            print (f'Snapshot from {dt.fromtimestamp(sn.time / 1000)} on ({sn.tx}, {sn.ty}, {sn.tz}) / ({sn.rx}, {sn.ry}, {sn.rz}, {sn.rw}) with {sn.cwidth}X{sn.chight} color image and a {sn.dwidth}X{sn.dhight} depth image')
+        dt_birth = dt.fromtimestamp(rdr.birth)
+        print(Fmt.USR.format(rdr.id, rdr.name, dt_birth, rdr.gender))
+
+        for sn in rdr:
+            snap_time = dt.fromtimestamp(sn.time / 1000)
+            print(Fmt.SNPT.format(snap_time, sn.tx, sn.ty, sn.tz,
+                                  sn.rx, sn.ry, sn.rz, sn.rw,
+                                  sn.cwidth, sn.chight,
+                                  sn.dwidth, sn.dhight))
+
+
 if __name__ == '__main__':
     main()

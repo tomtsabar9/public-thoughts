@@ -2,7 +2,6 @@ class Snapshot:
     def __init__(self, time):
         self.time = time
 
-
     def set_location(self, tx, ty, tz):
         self.tx = tx
         self.ty = ty

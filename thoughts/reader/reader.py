@@ -1,50 +1,52 @@
+# from PIL import Image
 
-import struct
-from PIL import Image
-
-from .formats import fmt
+from .formats import Unpack
 from .snapshot import Snapshot
 
+
 class Reader():
+
     def __init__(self, path):
-        print ("Hhhh")
         self.path = path
-        self.data_file = open(self.path, "rb")
+        self.data = open(self.path, "rb")
+        self.unpacker = Unpack(self.data)
 
-        self.id, self.name_length = struct.unpack(fmt.ID_NAME_LENGTH_FORMAT, self.data_file.read(12))
-            
-        self.name = struct.unpack(fmt.BYTE_ARRAY_FORMAT(self.name_length), self.data_file.read(self.name_length))[0].decode("utf-8")
+        self.id = self.unpacker.id()
 
-        self.birth, self.gender = struct.unpack(fmt.BIRTH_GENDER_FORMAT, self.data_file.read(5))
+        self.name_l = self.unpacker.name_length()
 
-        self.gender = self.gender.decode("utf-8").replace('m', 'male').replace('f', 'female').replace('o', 'other')
+        self.name = self.unpacker.name(self.name_l)
 
+        self.birth = self.unpacker.birth()
+
+        self.gender = self.unpacker.gender()
 
     def __iter__(self):
 
         while 1:
             try:
-
-                time =struct.unpack(fmt.TIME_FORMAT, self.data_file.read(8))[0]
-            except:
+                time = self.unpacker.time()
+            except Exception:
                 break
 
-            tx, ty, tz =struct.unpack(fmt.TRNSL_FORMAT, self.data_file.read(24))
+            tx, ty, tz = self.unpacker.transform()
 
-            rx, ry, rz, rw, hight, width =struct.unpack(fmt.ROTATE_IMWIDTH_IMHIGHT_FORMAT, self.data_file.read(40))
-                
-            img_color_array = struct.unpack(fmt.BYTE_ARRAY_FORMAT(hight*width*3), self.data_file.read(hight*width*3))[0]
-                
-            image = Image.frombytes("RGB",(width,hight),img_color_array, 'raw')
+            rx, ry, rz, rw = self.unpacker.rotation()
 
-            dhight, dwidth = struct.unpack(fmt.DEPTH_IMWIDTH_IMHIGHT_FORMAT, self.data_file.read(8))
+            hight, width = self.unpacker.image_size()
 
-            img_depth_array = struct.unpack(fmt.BYTE_ARRAY_FORMAT(dhight*dwidth*4), self.data_file.read(dhight*dwidth*4))[0]
+            img_color_array = self.unpacker.arr(hight*width*3)
 
-            dimage = Image.frombytes("I",(dwidth,dhight), img_depth_array, 'raw')
+            # image = Image.frombytes("RGB", (width, hight), img_color_array, 'raw')
 
-            hunger, thirst, exhaustion, happiness = struct.unpack(fmt.FEELING_FORMAT, self.data_file.read(16))
-            
+            dhight, dwidth = self.unpacker.image_size()
+
+            img_depth_array = self.unpacker.arr(dhight*dwidth*4)
+
+            # dimage = Image.frombytes("I", (dwidth, dhight), img_depth_array, 'raw')
+
+            hunger, thirst, exhaustion, happiness = self.unpacker.feeling()
+
             snapshot = Snapshot(time)
             snapshot.set_location(tx, ty, tz)
             snapshot.set_rotation(rx, ry, rz, rw)
@@ -53,4 +55,3 @@ class Reader():
             snapshot.set_thoughts(hunger, thirst, exhaustion, happiness)
 
             yield snapshot
-            
