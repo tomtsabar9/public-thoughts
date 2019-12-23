@@ -7,6 +7,7 @@ from .snapshot import Snapshot
 
 class Reader():
     def __init__(self, path):
+        print ("Hhhh")
         self.path = path
         self.data_file = open(self.path, "rb")
 
