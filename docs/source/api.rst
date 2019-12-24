@@ -3,7 +3,7 @@ Thoughts API Reference
 
 This is Thoughts's API reference.
 
-Snapshot
+Snapshot shot shot
 ---
 
 .. autoclass:: thoughts.Snapshot
