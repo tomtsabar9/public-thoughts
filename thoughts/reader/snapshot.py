@@ -1,5 +1,5 @@
 class Snapshot:
-    """Group all snapshot fields"""
+    """Snapt apt apt"""
 
     def __init__(self, time):
         self.time = time
