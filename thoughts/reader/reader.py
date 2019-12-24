@@ -13,9 +13,9 @@ class Reader():
 
         self.id = self.unpacker.id()
 
-        self.name_l = self.unpacker.name_length()
+        self.name_length = self.unpacker.name_length()
 
-        self.name = self.unpacker.name(self.name_l)
+        self.name = self.unpacker.name(self.name_length)
 
         self.birth = self.unpacker.birth()
 

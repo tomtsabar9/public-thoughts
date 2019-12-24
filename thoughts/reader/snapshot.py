@@ -1,8 +1,11 @@
 class Snapshot:
+    """Group all snapshot fields"""
+
     def __init__(self, time):
         self.time = time
 
     def set_location(self, tx, ty, tz):
+        """Sets location, represented by (x,y,z)"""
         self.tx = tx
         self.ty = ty
         self.tz = tz
